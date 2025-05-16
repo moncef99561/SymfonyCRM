@@ -1,5 +1,5 @@
 build:
-	docker compose build --force-rm
+	docker compose up --build -d
 
 down:
 	docker compose down
