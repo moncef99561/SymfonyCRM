@@ -1,0 +1,73 @@
+services:
+  symfony:
+    image: php-symfony:latest
+    build:
+      context: .
+      dockerfile: ./infra/php/Dockerfile
+    volumes:
+      - ./code:/var/www/html:cached
+      - ./infra/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./infra/php/config/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysql
+    networks:
+      - symfony
+
+  nginx:
+    image: nginx-nginx:latest
+    build:
+      context: ./infra/
+      args:
+        BUILD_ARGUMENT_ENV: dev
+      dockerfile: ./nginx/Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./code:/var/www/html
+      - ./infra/nginx/conf.d/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - symfony
+    networks:
+      - symfony
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: crm
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql:delegated
+    networks:
+      - symfony
+
+  myadmin:
+    image: phpmyadmin/phpmyadmin:5
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - symfony
+    volumes:
+      - db_admin_data:/var/www/html
+
+  mailcatcher:
+    image: yappabe/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    networks:
+      - symfony
+
+networks:
+  symfony:
+
+volumes:
+  mysql:
+  db_admin_data:
