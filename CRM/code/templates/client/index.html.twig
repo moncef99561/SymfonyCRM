@@ -14,6 +14,7 @@
                     <th>Nom du gérant</th>
                     <th>Prénom</th>
                     <th>Raison sociale</th>
+                    <th>Factures</th> {# ✅ nouvelle colonne #}
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -23,19 +24,38 @@
                         <td>{{ client.gerantNom }}</td>
                         <td>{{ client.gerantPrenom }}</td>
                         <td>{{ client.raisonSocial }}</td>
+
                         <td>
-                            <a href="{{ path('client_show', {'id': client.id}) }}" class="btn btn-sm btn-info">Voir</a>
-                            <a href="{{ path('client_edit', {'id': client.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                            {% if client.factures|length > 0 %}
+                                <ul class="list-unstyled mb-0">
+                                    {% for facture in client.factures %}
+                                        <li>
+                                            <strong>{{ facture.numFacture }}</strong> – 
+                                            {{ facture.montant }} MAD 
+                                            <span class="badge bg-secondary">{{ facture.state }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em>Aucune</em>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{{ path('client_show', {'id': client.id}) }}" class="btn btn-sm btn-info"><i class="fa-solid fa-eye"></i></a>
+                            <a href="{{ path('client_edit', {'id': client.id}) }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <a href="{{ path('facture_new', { id: client.id }) }}" class="btn btn-sm btn-success"><i class="fa-solid fa-file-invoice"></i></a>
 
                             <form method="post" action="{{ path('client_delete', {'id': client.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression de ce client ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ client.id) }}">
-                                <button class="btn btn-sm btn-danger">Supprimer</button>
+                                <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                             </form>
                         </td>
+
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4" class="text-center">Aucun client trouvé.</td>
+                        <td colspan="5" class="text-center">Aucun client trouvé.</td>
                     </tr>
                 {% endfor %}
             </tbody>

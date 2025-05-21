@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Factures de {{ client.raisonSocial }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Factures de {{ client.raisonSocial }}</h1>
+        <a href="{{ path('client_index') }}" class="btn btn-secondary">← Retour aux clients</a>
+    </div>
+
+    {# <a href="{{ path('facture_new', { id: client.id }) }}" class="btn btn-success mb-3">Ajouter une facture</a> #}
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Numéro</th>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>État</th>
+                <th>Commentaire</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for facture in factures %}
+                <tr>
+                    <td>{{ facture.numFacture }}</td>
+                    <td>{{ facture.dateFacture|date('d/m/Y') }}</td>
+                    <td>{{ facture.montant }} MAD</td>
+                    <td>{{ facture.state }}</td>
+                    <td>{{ facture.commentaire }}</td>
+                    <td>
+                        <a href="{{ path('facture_edit', { id: facture.id }) }}" class="btn btn-sm btn-primary">Modifier</a>
+                        <form method="post" action="{{ path('facture_delete', { id: facture.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette facture ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_facture_' ~ facture.id) }}">
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucune facture trouvée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

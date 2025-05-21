@@ -30,27 +30,33 @@ final class ClientController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'client_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
-    {
-        $client = new Client();
-        $form = $this->createForm(ClientType::class, $client);
-        $form->handleRequest($request);
+#[Route('/new', name: 'client_new', methods: ['GET', 'POST'])]
+public function new(Request $request, EntityManagerInterface $em): Response
+{
+    $client = new Client();
+    $form = $this->createForm(ClientType::class, $client);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Lier le client à l'utilisateur connecté
-            $client->setUtilisateurOwner($this->getUser());
+    if ($form->isSubmitted() && $form->isValid()) {
+        /** @var \App\Entity\Utilisateur $utilisateur */
+        $utilisateur = $this->getUser();
+        
+        $client->setUtilisateurOwner($utilisateur);
+        $client->setGerantNom($utilisateur->getNom());
+        $client->setGerantPrenom($utilisateur->getPrenom());
 
-            $em->persist($client);
-            $em->flush();
+        $em->persist($client);
+        $em->flush();
 
-            return $this->redirectToRoute('client_index');
-        }
-
-        return $this->render('client/new.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('client_index');
     }
+
+    return $this->render('client/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
+
 
     #[Route('/{id}/edit', name: 'client_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Client $client, EntityManagerInterface $em): Response
@@ -85,8 +91,21 @@ final class ClientController extends AbstractController
             $em->flush();
         }
 
-    return $this->redirectToRoute('client_index');
-}
+        return $this->redirectToRoute('client_index');
+    }
+
+    #[Route('/{id}', name: 'client_show', methods: ['GET'])]
+public function show(Client $client): Response
+{
+    if ($client->getUtilisateurOwner() !== $this->getUser()) {
+        throw $this->createAccessDeniedException('Ce client ne vous appartient pas.');
+    }
+
+    return $this->render('client/show.html.twig', [
+            'client' => $client,
+        ]);
+    }
+
 
 
 }

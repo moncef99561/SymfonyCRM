@@ -2,7 +2,71 @@
 
 {% block title %}Accueil{% endblock %}
 
-{% block body %}
-    <h1 class="text-center">Bienvenue sur Customer Relationship Management</h1>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .hero-wrapper {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .hero-left {
+            flex: 1;
+            background: linear-gradient(to right, #0062E6, rgba(0, 98, 230, 0));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            z-index: 2;
+        }
+
+        .hero-left h1 {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .hero-left p {
+            font-size: 1.3rem;
+            margin-top: 20px;
+        }
+
+        .hero-right {
+            flex: 1;
+            background: url('{{ asset("images/landing-crm.jpg") }}') center/cover no-repeat;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .hero-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .hero-left, .hero-right {
+                width: 100%;
+                padding: 40px 20px;
+                text-align: center;
+            }
+
+            .hero-right {
+                height: 300px;
+            }
+
+            .hero-left h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 {% endblock %}
 
+{% block body %}
+<div class="hero-wrapper">
+    <div class="hero-left">
+        <h1>Bienvenue sur votre CRM</h1>
+        <p>Gérez facilement vos clients et leurs factures dans un espace moderne et sécurisé.</p>
+    </div>
+    <div class="hero-right"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la facture{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Modifier la facture {{ facture.numFacture }}</h1>
+        <a href="{{ path('facture_client', { id: client.id }) }}" class="btn btn-secondary">← Retour</a>
+    </div>
+
+    {{ form_start(form) }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.montant) }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form_row(form.state) }}
+        </div>
+        <div class="col-12 mb-3">
+            {{ form_row(form.commentaire) }}
+        </div>
+    </div>
+    <button class="btn btn-primary">Mettre à jour</button>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

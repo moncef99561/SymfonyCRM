@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    environment {
+        SONAR_TOKEN = credentials('sonarqube-token')
+    }
+    stages {
+        stage('Clone') {
+            steps { git url: 'https://gitlab.com/mon-projet.git', branch: 'main' }
+        }
+        stage('Install') {
+            steps {
+                sh 'composer install'
+                sh 'php bin/console cache:clear'
+            }
+        }
+        stage('SonarQube') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+        stage('Docker') {
+            steps {
+                sh 'docker build -t monuser/crm_symfony .'
+                sh 'docker push monuser/crm_symfony'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy.yml'
+            }
+        }
+    }
+}

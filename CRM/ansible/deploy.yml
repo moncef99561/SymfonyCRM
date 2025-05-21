@@ -1,0 +1,5 @@
+---
+- hosts: local
+  tasks:
+    - name: Déployer les conteneurs
+      shell: docker-compose down && docker-compose pull && docker-compose up -d
