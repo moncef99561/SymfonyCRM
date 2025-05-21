@@ -1,20 +1,44 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ClientController!{% endblock %}
+{% block title %}Mes clients{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <div class="container mt-4">
+        <h1 class="mb-4">Mes clients</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        <a href="{{ path('client_new') }}" class="btn btn-success mb-3">Ajouter un client</a>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/var/www/html/src/Controller/ClientController.php</code></li>
-        <li>Your template at <code>/var/www/html/templates/client/index.html.twig</code></li>
-    </ul>
-</div>
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nom du gérant</th>
+                    <th>Prénom</th>
+                    <th>Raison sociale</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                    <tr>
+                        <td>{{ client.gerantNom }}</td>
+                        <td>{{ client.gerantPrenom }}</td>
+                        <td>{{ client.raisonSocial }}</td>
+                        <td>
+                            <a href="{{ path('client_show', {'id': client.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{{ path('client_edit', {'id': client.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+
+                            <form method="post" action="{{ path('client_delete', {'id': client.id}) }}" class="d-inline" onsubmit="return confirm('Confirmer la suppression de ce client ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ client.id) }}">
+                                <button class="btn btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">Aucun client trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

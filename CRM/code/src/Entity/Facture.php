@@ -14,22 +14,22 @@ class Facture
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $numFacture = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $dateFacture = null;
+    private ?\DateTimeInterface $dateFacture = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 0)]
-    private ?string $Montant = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $State = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?float $montant = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Commentaire = null;
+    private ?string $state = null;
 
-    #[ORM\ManyToOne(inversedBy: 'Factures')]
+    #[ORM\Column(length: 255)]
+    private ?string $commentaire = null;
+
+    #[ORM\ManyToOne(inversedBy: 'factures')]
     private ?Client $client = null;
 
     public function getId(): ?int
@@ -54,45 +54,45 @@ class Facture
         return $this->dateFacture;
     }
 
-    public function setDateFacture(\DateTime $dateFacture): static
+    public function setDateFacture(\DateTimeInterface $dateFacture): static
     {
         $this->dateFacture = $dateFacture;
 
         return $this;
     }
 
-    public function getMontant(): ?string
+    public function getMontant(): ?float
     {
-        return $this->Montant;
+        return $this->montant;
     }
 
-    public function setMontant(string $Montant): static
+    public function setMontant(float $montant): static
     {
-        $this->Montant = $Montant;
+        $this->montant = $montant;
 
         return $this;
     }
 
     public function getState(): ?string
     {
-        return $this->State;
+        return $this->state;
     }
 
-    public function setState(string $State): static
+    public function setState(string $state): static
     {
-        $this->State = $State;
+        $this->state = $state;
 
         return $this;
     }
 
     public function getCommentaire(): ?string
     {
-        return $this->Commentaire;
+        return $this->commentaire;
     }
 
-    public function setCommentaire(string $Commentaire): static
+    public function setCommentaire(string $commentaire): static
     {
-        $this->Commentaire = $Commentaire;
+        $this->commentaire = $commentaire;
 
         return $this;
     }

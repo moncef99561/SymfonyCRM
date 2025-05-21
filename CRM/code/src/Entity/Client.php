@@ -6,6 +6,7 @@ use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Utilisateur;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 class Client
@@ -25,29 +26,29 @@ class Client
     private ?string $raisonSocial = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Telephone = null;
+    private ?string $telephone = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Adresse = null;
+    private ?string $adresse = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Ville = null;
+    private ?string $ville = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Pays = null;
+    private ?string $pays = null;
 
     #[ORM\ManyToOne(inversedBy: 'clients')]
-    private ?User $userOwner = null;
+    private ?Utilisateur $utilisateurOwner = null;
 
     /**
      * @var Collection<int, Facture>
      */
     #[ORM\OneToMany(targetEntity: Facture::class, mappedBy: 'client')]
-    private Collection $Factures;
+    private Collection $factures;
 
     public function __construct()
     {
-        $this->Factures = new ArrayCollection();
+        $this->factures = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -63,7 +64,6 @@ class Client
     public function setGerantNom(string $gerantNom): static
     {
         $this->gerantNom = $gerantNom;
-
         return $this;
     }
 
@@ -75,7 +75,6 @@ class Client
     public function setGerantPrenom(string $gerantPrenom): static
     {
         $this->gerantPrenom = $gerantPrenom;
-
         return $this;
     }
 
@@ -87,7 +86,6 @@ class Client
     public function setRaisonSocial(string $raisonSocial): static
     {
         $this->raisonSocial = $raisonSocial;
-
         return $this;
     }
 
@@ -99,55 +97,50 @@ class Client
     public function setTelephone(string $telephone): static
     {
         $this->telephone = $telephone;
-
         return $this;
     }
 
     public function getAdresse(): ?string
     {
-        return $this->Adresse;
+        return $this->adresse;
     }
 
-    public function setAdresse(string $Adresse): static
+    public function setAdresse(string $adresse): static
     {
-        $this->Adresse = $Adresse;
-
+        $this->adresse = $adresse;
         return $this;
     }
 
     public function getVille(): ?string
     {
-        return $this->Ville;
+        return $this->ville;
     }
 
-    public function setVille(string $Ville): static
+    public function setVille(string $ville): static
     {
-        $this->Ville = $Ville;
-
+        $this->ville = $ville;
         return $this;
     }
 
     public function getPays(): ?string
     {
-        return $this->Pays;
+        return $this->pays;
     }
 
-    public function setPays(string $Pays): static
+    public function setPays(string $pays): static
     {
-        $this->Pays = $Pays;
-
+        $this->pays = $pays;
         return $this;
     }
 
-    public function getUserOwner(): ?User
+    public function getUtilisateurOwner(): ?Utilisateur
     {
-        return $this->userOwner;
+        return $this->utilisateurOwner;
     }
 
-    public function setUserOwner(?User $userOwner): static
+    public function setUtilisateurOwner(?Utilisateur $utilisateurOwner): static
     {
-        $this->userOwner = $userOwner;
-
+        $this->utilisateurOwner = $utilisateurOwner;
         return $this;
     }
 
@@ -156,28 +149,25 @@ class Client
      */
     public function getFactures(): Collection
     {
-        return $this->Factures;
+        return $this->factures;
     }
 
     public function addFacture(Facture $facture): static
     {
-        if (!$this->Factures->contains($facture)) {
-            $this->Factures->add($facture);
+        if (!$this->factures->contains($facture)) {
+            $this->factures->add($facture);
             $facture->setClient($this);
         }
-
         return $this;
     }
 
     public function removeFacture(Facture $facture): static
     {
-        if ($this->Factures->removeElement($facture)) {
-            // set the owning side to null (unless already changed)
+        if ($this->factures->removeElement($facture)) {
             if ($facture->getClient() === $this) {
                 $facture->setClient(null);
             }
         }
-
         return $this;
     }
 }
