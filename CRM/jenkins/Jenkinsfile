@@ -1,35 +1,97 @@
 pipeline {
     agent any
+
     environment {
+        DOCKER_IMAGE = 'moncef20/crm-symfony:latest'
         SONAR_TOKEN = credentials('sonarqube-token')
     }
+
     stages {
-        stage('Clone') {
-            steps { git url: 'https://gitlab.com/mon-projet.git', branch: 'main' }
-        }
-        stage('Install') {
+        
+        stage('Init') {
             steps {
-                sh 'composer install'
-                sh 'php bin/console cache:clear'
+                echo "Début du pipeline"
             }
         }
-        stage('SonarQube') {
+
+        stage('Cloner le dépôt') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'sonar-scanner'
+                git branch: 'main', url: 'https://gitlab.com/moncefcharifi2000/devops_crm.git'
+            }
+        }
+
+        stage('Composer install & Clear cache') {
+            steps {
+                dir('code') {
+                    sh '''
+                        docker run --rm -v $(pwd):/app -w /app php:8.3-cli \
+                        bash -c "apt update && apt install -y unzip git libzip-dev && docker-php-ext-install zip && \
+                        curl -sS https://getcomposer.org/installer | php && \
+                        php composer.phar install --no-interaction --prefer-dist && \
+                        php bin/console cache:clear"
+                    '''
                 }
             }
         }
-        stage('Docker') {
+
+        stage('Analyse SonarQube') {
             steps {
-                sh 'docker build -t monuser/crm_symfony .'
-                sh 'docker push monuser/crm_symfony'
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        docker.image('sonarsource/sonar-scanner-cli').inside("-v ${env.WORKSPACE}:/usr/src") {
+                            sh '''
+                                sonar-scanner \
+                                    -Dsonar.projectKey=Devops_CRM \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url=http://10.0.2.15:9000 \
+                                    -Dsonar.token=$SONAR_TOKEN \
+                                    -Dsonar.userHome=/usr/src/.sonar
+                            '''
+                        }
+                    }
+                }
             }
         }
-        stage('Deploy') {
+
+        stage('Build Docker Image') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy.yml'
+                sh "docker build -t $DOCKER_IMAGE -f infra/php/Dockerfile ./infra"
             }
         }
+
+        stage('Push Docker Image to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerHub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        docker push \$DOCKER_IMAGE
+                    """
+                }
+            }
+        }
+
+        stage('Déploiement avec Ansible') {
+            steps {
+                sh '''
+                    export PATH=$PATH:/usr/bin
+                    cd ansible
+                    ansible-playbook -i inventory.ini deploy.yml
+                '''
+            }
+        }
+
     }
+
+    // post {
+    //     success {
+    //         echo 'Déploiement réussi.'
+    //     }
+    //     failure {
+    //         echo 'Une erreur est survenue.'
+    //     }
+    // }
 }

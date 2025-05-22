@@ -1,5 +1,27 @@
----
-- hosts: local
+- name: Déploiement de l'application CRM Symfony via Docker Compose
+  hosts: local
+  become: false
   tasks:
-    - name: Déployer les conteneurs
-      shell: docker-compose down && docker-compose pull && docker-compose up -d
+
+    - name: Cloner le dépôt depuis GitLab
+      ansible.builtin.git:
+        repo: https://gitlab.com/moncefcharifi2000/devops_crm.git
+        dest: /var/lib/jenkins/devops_crm
+        version: main
+        force: yes
+
+    - name: Arrêter les anciens conteneurs Docker
+      ansible.builtin.shell: docker compose down
+      args:
+        chdir: /var/lib/jenkins/devops_crm
+
+    - name: Supprimer les anciennes images si nécessaire (optionnel)
+      ansible.builtin.shell: docker image prune -f
+
+    - name: Pull de l'image depuis DockerHub
+      ansible.builtin.shell: docker pull moncef20/crm-symfony
+
+    - name: Relancer les conteneurs avec Docker Compose
+      ansible.builtin.shell: docker compose up -d
+      args:
+        chdir: /var/lib/jenkins/devops_crm
