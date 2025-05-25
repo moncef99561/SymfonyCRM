@@ -3,10 +3,31 @@
 {% block title %}Ajouter une facture{% endblock %}
 
 {% block body %}
-<h1>Ajouter une facture à {{ client.raisonSocial }}</h1>
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-primary">Enregistrer</button>
-{{ form_end(form) }}
+<div class="container mt-5">
+    <h1 class="mb-4">Ajouter une facture à <span class="text-primary">{{ client.raisonSocial }}</span></h1>
 
+    <div class="card shadow p-4">
+        {{ form_start(form) }}
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                {{ form_row(form.montant) }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_row(form.state) }}
+            </div>
+
+            <div class="col-12 mb-3">
+                {{ form_row(form.commentaire) }}
+            </div>
+        </div>
+
+        <button class="btn btn-success mt-3">
+            <i class="fa-solid fa-check me-1"></i> Enregistrer
+        </button>
+
+        {{ form_end(form) }}
+    </div>
+</div>
 {% endblock %}

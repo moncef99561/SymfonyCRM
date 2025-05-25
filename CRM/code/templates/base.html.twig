@@ -11,21 +11,21 @@
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light px-5">
-            <a class="navbar-brand" href="/">SymfonyCRM</a>
+            <a class="navbar-brand fs-4 text-primary" href="{{path('app_home')}}">SymfonyCRM</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav mx-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="/">Accueil</a>
+                        <a class="nav-link active" href="{{path('app_home')}}"><i class="fa-solid fa-house me-1"></i> Accueil</a>
                     </li>
                         <li class="nav-item active">
-                        <a class="nav-link" href="/clients">Clients</a>
+                        <a class="nav-link" href="{{path('client_index')}}"><i class="fa-solid fa-user-tie me-1"></i>Clients</a>
                     </li>
                         <li class="nav-item active">
-                        <a class="nav-link" href="factures/all">Factures</a>
+                        <a class="nav-link" href="{{path('facture_all')}}"><i class="fa-solid fa-file-invoice me-1"></i>Factures</a>
                     </li>
                 </ul>
                 <div class="ms-auto">
@@ -44,6 +44,18 @@
                 </div>
             </div>
         </nav>
+
+        <div class="container">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
 
         <div>
             {% block body %}{% endblock %}

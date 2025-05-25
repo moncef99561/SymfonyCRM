@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\FactureRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,21 +16,32 @@ class Facture
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank(message: "Le numéro de facture est obligatoire.")]
+    #[Assert\Length(max: 255)]
     private ?string $numFacture = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: "La date de la facture est obligatoire.")]
+    #[Assert\Type(\DateTimeInterface::class)]
+    #[Assert\LessThanOrEqual("today", message: "La date de la facture ne peut pas être dans le futur.", groups: ['manual'])]
     private ?\DateTimeInterface $dateFacture = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?float $montant = null;
+    #[Assert\NotNull(message: "Le montant est obligatoire.")]
+    #[Assert\Positive(message: "Le montant doit être supérieur à 0.")]
+    private ?string $montant = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "L'état de la facture est obligatoire.")]
+    #[Assert\Choice(choices: ['Payée', 'Partiellement payé', 'Non payée'], message: "L'état doit être 'Payée', 'Partiellement payé' ou 'Non payée'.")]
     private ?string $state = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Length(max: 255)]
     private ?string $commentaire = null;
 
     #[ORM\ManyToOne(inversedBy: 'factures')]
+    #[Assert\NotNull(message: "La facture doit être liée à un client.")]
     private ?Client $client = null;
 
     public function getId(): ?int
@@ -61,12 +73,12 @@ class Facture
         return $this;
     }
 
-    public function getMontant(): ?float
+    public function getMontant(): ?string
     {
         return $this->montant;
     }
 
-    public function setMontant(float $montant): static
+    public function setMontant(string $montant): static
     {
         $this->montant = $montant;
 

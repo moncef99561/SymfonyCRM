@@ -47,76 +47,73 @@ class FactureController extends AbstractController
     }
 
 
-    #[Route('/client/{id}/new', name: 'facture_new', methods: ['GET', 'POST'])]
-    public function new(Client $client, Request $request, EntityManagerInterface $em): Response
-    {
-        if ($client->getUtilisateurOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Accès interdit.');
-        }
+#[Route('/client/{id}/new', name: 'facture_new', methods: ['GET', 'POST'])]
+public function new(Client $client, Request $request, EntityManagerInterface $em): Response
+{
+    $this->denyAccessUnlessGranted('FACTURE_CREATE', $client);
 
-        $facture = new Facture();
-        $facture->setClient($client);
-        $facture->setDateFacture(new \DateTime());
+    $facture = new Facture();
+    $facture->setClient($client);
+    $facture->setDateFacture((new \DateTime())->setTime(0, 0));
 
-        $latestId = $em->getRepository(Facture::class)->findOneBy([], ['id' => 'DESC']);
-        $nextId = $latestId ? $latestId->getId() + 1 : 1;
-        $facture->setNumFacture('FAC' . date('Y') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT));
+    $latestId = $em->getRepository(Facture::class)->findOneBy([], ['id' => 'DESC']);
+    $nextId = $latestId ? $latestId->getId() + 1 : 1;
+    $facture->setNumFacture('FAC' . date('Y') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT));
 
-        $form = $this->createForm(FactureType::class, $facture);
-        $form->handleRequest($request);
+    $form = $this->createForm(FactureType::class, $facture);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($facture);
-            $em->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->persist($facture);
+        $em->flush();
 
-            return $this->redirectToRoute('facture_client', ['id' => $client->getId()]);
-        }
+        $this->addFlash('success', 'La facture a été ajoutée avec succès.');
+        return $this->redirectToRoute('facture_all');
 
-        return $this->render('facture/new.html.twig', [
-            'form' => $form->createView(),
-            'client' => $client,
-        ]);
     }
 
+    return $this->render('facture/new.html.twig', [
+        'form' => $form->createView(),
+        'client' => $client,
+    ]);
+}
+
+
     #[Route('/{id}/edit', name: 'facture_edit', methods: ['GET', 'POST'])]
+    // #[IsGranted('FACTURE_EDIT', 'facture')]
     public function edit(Request $request, Facture $facture, EntityManagerInterface $em): Response
     {
-        $client = $facture->getClient();
-
-        if ($client->getUtilisateurOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('FACTURE_EDIT', $facture);
 
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            return $this->redirectToRoute('facture_client', ['id' => $client->getId()]);
+            return $this->redirectToRoute('facture_client', ['id' => $facture->getClient()->getId()]);
         }
 
         return $this->render('facture/edit.html.twig', [
             'form' => $form->createView(),
-            'client' => $client,
+            'client' => $facture->getClient(),
             'facture' => $facture
         ]);
     }
 
 
-    #[Route('/{id}/delete', name: 'facture_delete', methods: ['POST'])]
-    public function delete(Request $request, Facture $facture, EntityManagerInterface $em): Response
-    {
-        $client = $facture->getClient();
 
-        if ($client->getUtilisateurOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
+#[Route('/{id}/delete', name: 'facture_delete', methods: ['POST'])]
+// $this->denyAccessUnlessGranted('FACTURE_DELETE', $facture);
+public function delete(Request $request, Facture $facture, EntityManagerInterface $em): Response
+{
+    $this->denyAccessUnlessGranted('FACTURE_DELETE', $facture);
 
-        if ($this->isCsrfTokenValid('delete_facture_' . $facture->getId(), $request->request->get('_token'))) {
-            $em->remove($facture);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('facture_client', ['id' => $client->getId()]);
+    if ($this->isCsrfTokenValid('delete_facture_' . $facture->getId(), $request->request->get('_token'))) {
+        $em->remove($facture);
+        $em->flush();
     }
+
+    return $this->redirectToRoute('facture_client', ['id' => $facture->getClient()->getId()]);
+}
+
 }
